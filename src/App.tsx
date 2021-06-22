@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import Excalidraw from "@excalidraw/excalidraw";
 import "./App.css";
 import { exportToStaticUrl, loadFromStaticUrl } from "./static-urls";
@@ -6,7 +6,11 @@ import {
   ExcalidrawElement,
   NonDeletedExcalidrawElement,
 } from "@excalidraw/excalidraw/types/element/types";
-import { AppState } from "@excalidraw/excalidraw/types/types";
+import {
+  AppState,
+  ExcalidrawAPIRefValue,
+} from "@excalidraw/excalidraw/types/types";
+import { useCollab } from "./useCollab";
 
 const STATIC_DATA_KEY = "s";
 const STATIC_DATA_MARKER = `#${STATIC_DATA_KEY}=`;
@@ -56,6 +60,9 @@ const exportToBackend = async (
 
 function App() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const excalidrawRef = useRef<ExcalidrawAPIRefValue>(null);
+  const roomId = "1"
+  const { startSession, onChange } = useCollab(roomId, excalidrawRef);
 
   const initialData = useMemo(
     () =>
@@ -81,6 +88,11 @@ function App() {
       onExportToBackend={(elements, appState) =>
         exportToBackend(elements, appState)
       }
+      onCollabButtonClick={() => {
+        startSession();
+      }}
+      onChange={onChange}
+      ref={excalidrawRef}
     />
   );
 }
